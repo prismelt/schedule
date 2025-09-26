@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { schedules } from "~/server/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, gte } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const scheduleRouter = createTRPCRouter({
@@ -67,4 +67,14 @@ export const scheduleRouter = createTRPCRouter({
         );
       return { success: true };
     }),
+  getAllFuture: protectedProcedure.query(async ({ ctx }) => {
+    const now = new Date();
+    return await ctx.db.query.schedules.findMany({
+      where: and(
+        eq(schedules.userId, ctx.session.user.id),
+        gte(schedules.date, now),
+      ),
+      orderBy: (schedules, { asc }) => [asc(schedules.date)],
+    });
+  }),
 });
