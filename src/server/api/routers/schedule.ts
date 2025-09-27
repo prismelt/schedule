@@ -19,7 +19,19 @@ export const scheduleRouter = createTRPCRouter({
       if (date <= now) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: `Cannot register date '${date.toISOString()}' that's in the past.`,
+          message: `Cannot register date '${date.toLocaleDateString("en-US")}' that's in the past.`,
+        });
+      }
+      const isExist = await ctx.db.query.schedules.findFirst({
+        where: and(
+          eq(schedules.userId, ctx.session.user.id),
+          eq(schedules.date, date),
+        ),
+      });
+      if (isExist) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Schedule on date '${date.toLocaleDateString("en-US")}' already exists for user '${ctx.session.user.name}'`,
         });
       }
       await ctx.db.insert(schedules).values({
@@ -42,7 +54,7 @@ export const scheduleRouter = createTRPCRouter({
       if (date <= now) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: `Cannot unregister date '${date.toISOString()}' that's in the past.`,
+          message: `Cannot unregister date '${date.toLocaleDateString("en-US")}' that's in the past.`,
         });
       }
       const isExist = await ctx.db.query.schedules.findFirst({
@@ -54,7 +66,7 @@ export const scheduleRouter = createTRPCRouter({
       if (!isExist) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: `Schedule on date '${date.toISOString()}' does not exist for user '${ctx.session.user.id}'`,
+          message: `Schedule on date '${date.toLocaleDateString("en-US")}' does not exist for user '${ctx.session.user.name}'`,
         });
       }
       await ctx.db
@@ -76,5 +88,19 @@ export const scheduleRouter = createTRPCRouter({
       ),
       orderBy: (schedules, { asc }) => [asc(schedules.date)],
     });
+  }),
+
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.schedules.findMany({
+      where: eq(schedules.userId, ctx.session.user.id),
+      orderBy: (schedules, { asc }) => [asc(schedules.date)],
+    });
+  }),
+
+  clear: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.db
+      .delete(schedules)
+      .where(eq(schedules.userId, ctx.session.user.id));
+    return { success: true };
   }),
 });

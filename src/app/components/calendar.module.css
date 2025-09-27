@@ -1,0 +1,133 @@
+.calendar {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.monthYear {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.navButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1.125rem;
+}
+
+.navButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.navButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.weekDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.weekDay {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 1rem;
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.day {
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  font-weight: 600;
+  border: 2px solid transparent;
+  padding: 0.75rem 0.5rem;
+  position: relative;
+}
+
+.day:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.day.otherMonth {
+  color: rgba(255, 255, 255, 0.3);
+  opacity: 0.6;
+}
+
+.day.today {
+  background: rgba(88, 101, 242, 0.3);
+  border-color: #5865f2;
+}
+
+.day.selected {
+  background: #5865f2;
+  color: white;
+  box-shadow: 0 4px 12px rgba(88, 101, 242, 0.4);
+}
+
+.dayNumber {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.dayContent {
+  font-size: 0.75rem;
+  text-align: center;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .calendar {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .day {
+    min-height: 60px;
+    padding: 0.5rem 0.25rem;
+  }
+
+  .dayNumber {
+    font-size: 1rem;
+  }
+
+  .dayContent {
+    font-size: 0.625rem;
+  }
+}

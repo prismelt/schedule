@@ -3,15 +3,26 @@
 import { api } from "~/trpc/react";
 
 function NextSession() {
-  const [futureSessions] = api.schedule.getAllFuture.useSuspenseQuery();
-  const nearestSession = futureSessions[0];
+  const {
+    data: futureSessions,
+    isLoading,
+    error,
+  } = api.schedule.getAllFuture.useQuery();
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  const nearestSession = futureSessions?.[0];
+
   return (
     <div>
-      <h1>
-        {nearestSession
-          ? `Next Session at ${nearestSession.date.toISOString()}`
-          : "No future sessions"}
-      </h1>
+      {nearestSession ? (
+        <div>
+          Next session: {nearestSession.date.toLocaleDateString("en-US")}
+        </div>
+      ) : (
+        <div>No upcoming sessions</div>
+      )}
     </div>
   );
 }

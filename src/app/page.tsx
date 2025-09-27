@@ -1,32 +1,20 @@
 import { auth } from "~/server/auth";
-import NextSession from "~/app/components/session";
-import { HydrateClient } from "~/trpc/server";
-import styles from "./index.module.css";
+import styles from "./app.module.css";
+import Calendar from "~/app/components/calendar";
+import { redirect } from "next/navigation";
 
 async function Home() {
   const session = await auth();
   if (!session?.user) {
-    return (
-      <HydrateClient>
-        <main className={styles.main}>
-          <div className={styles.container}>
-            <h1 className={styles.title}>Register for a Session</h1>
-            <p className={styles.description}>Please log in to continue.</p>
-          </div>
-        </main>
-      </HydrateClient>
-    );
+    redirect("/signin");
   }
-
   return (
-    <HydrateClient>
-      <main className={styles.main}>
-        <div className={styles.container}>
-          <h1 className={styles.title}>Register for a Session</h1>
-          <NextSession />
-        </div>
-      </main>
-    </HydrateClient>
+    <main className={styles.main}>
+      <div className={styles.container}>
+        <h1 className={styles.title}>Hello, {session.user.name}</h1>
+        <Calendar />
+      </div>
+    </main>
   );
 }
 
