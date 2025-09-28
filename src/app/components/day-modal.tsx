@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "~/trpc/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./day-modal.module.css";
 
 interface DayModalProps {
@@ -22,10 +22,15 @@ function DayModal({
   const [partnerName, setPartnerName] = useState("");
 
   const { data: hasPartner } = api.partner.hasPartner.useQuery();
-  if (hasPartner) {
-    const { data: partner } = api.partner.getPartner.useQuery();
-    setPartnerName(partner ?? "");
-  }
+  const { data: partner } = api.partner.getPartner.useQuery(undefined, {
+    enabled: !!hasPartner,
+  });
+
+  useEffect(() => {
+    if (hasPartner && partner) {
+      setPartnerName(partner);
+    }
+  }, [hasPartner, partner]);
 
   const utils = api.useUtils();
 
