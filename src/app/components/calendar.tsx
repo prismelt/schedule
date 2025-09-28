@@ -2,35 +2,15 @@
 
 import { useState } from "react";
 import styles from "./calendar.module.css";
+import CalendarDay from "./calendar-day";
+import DayModal from "./day-modal";
+import { api } from "~/trpc/react";
 
-interface CalendarDayProps {
-  date: Date;
-  isCurrentMonth: boolean;
-  isToday: boolean;
-  isSelected: boolean;
-  onClick: (date: Date) => void;
-}
-
-function CalendarDay({
-  date,
-  isCurrentMonth,
-  isToday,
-  isSelected,
-  onClick,
-}: CalendarDayProps) {
-  return (
-    <div
-      className={`${styles.day} ${!isCurrentMonth ? styles.otherMonth : ""} ${isToday ? styles.today : ""} ${isSelected ? styles.selected : ""}`}
-      onClick={() => onClick(date)}
-    >
-      {date.getDate()}
-    </div>
-  );
-}
-
-export default function Calendar() {
+function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const { data: userSchedules } = api.schedule.getAll.useQuery();
 
   const today = new Date();
   const maxDate = new Date(
@@ -67,7 +47,6 @@ export default function Calendar() {
     const month = currentDate.getMonth();
 
     const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
 
@@ -80,10 +59,6 @@ export default function Calendar() {
     }
 
     return days;
-  };
-
-  const handleDayClick = (date: Date) => {
-    setSelectedDate(date);
   };
 
   const monthNames = [
@@ -102,6 +77,25 @@ export default function Calendar() {
   ];
 
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const handleDayClick = (date: Date) => {
+    setSelectedDate(date);
+  };
+
+  const closeModal = () => {
+    setSelectedDate(null);
+  };
+
+  // Check if user is registered for a specific date
+  const isUserRegistered = (date: Date) => {
+    if (!userSchedules) return false;
+    const targetDateString = date.toISOString().split("T")[0]; // "2024-09-26"
+    return userSchedules.some((schedule) => {
+      const scheduleDate = new Date(schedule.date);
+      const scheduleDateString = scheduleDate.toISOString().split("T")[0];
+      return scheduleDateString === targetDateString;
+    });
+  };
 
   return (
     <div className={styles.calendar}>
@@ -138,13 +132,25 @@ export default function Calendar() {
           <CalendarDay
             key={index}
             date={date}
-            isCurrentMonth={date.getMonth() === currentDate.getMonth()}
-            isToday={date.toDateString() === today.toDateString()}
-            isSelected={selectedDate?.toDateString() === date.toDateString()}
+            isPassed={date < today}
+            isActive={![0, 1, 6].includes(date.getDay())}
+            isRegistered={isUserRegistered(date)}
+            partnerIsRegistered={true} // TODO: implement partner logic
             onClick={handleDayClick}
           />
         ))}
       </div>
+
+      {selectedDate && (
+        <DayModal
+          date={selectedDate}
+          isRegistered={isUserRegistered(selectedDate)}
+          partnerIsRegistered={true} // TODO: implement partner logic
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 }
+
+export default Calendar;

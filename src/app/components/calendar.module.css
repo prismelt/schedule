@@ -78,6 +78,7 @@
   border: 2px solid transparent;
   padding: 0.75rem 0.5rem;
   position: relative;
+  user-select: none;
 }
 
 .day:hover {
@@ -85,20 +86,40 @@
   transform: translateY(-2px);
 }
 
-.day.otherMonth {
+.day.bothRegistered {
+  background: rgba(102, 187, 106, 0.3);
+  border-color: #66bb6a;
+}
+
+.day.selfRegistered {
+  background: rgba(255, 152, 0, 0.3);
+  border-color: #ff9800;
+}
+
+.day.partnerRegistered {
+  background: rgba(236, 64, 122, 0.3);
+  border-color: #ec407a;
+}
+
+.day.passed {
   color: rgba(255, 255, 255, 0.3);
   opacity: 0.6;
+  cursor: default;
 }
 
-.day.today {
-  background: rgba(88, 101, 242, 0.3);
-  border-color: #5865f2;
+.day.passed:hover {
+  background: transparent;
+  transform: none;
 }
 
-.day.selected {
-  background: #5865f2;
-  color: white;
-  box-shadow: 0 4px 12px rgba(88, 101, 242, 0.4);
+.day.inactive {
+  opacity: 0.85;
+  cursor: default;
+}
+
+.day.inactive:hover {
+  background: transparent;
+  transform: none;
 }
 
 .dayNumber {

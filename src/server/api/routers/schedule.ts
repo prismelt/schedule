@@ -14,14 +14,24 @@ export const scheduleRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const date = new Date(input.date);
+      // Parse date and normalize to start of day in local timezone
+      const inputDate = new Date(input.date + "T00:00:00");
+      const date = new Date(
+        inputDate.getFullYear(),
+        inputDate.getMonth(),
+        inputDate.getDate(),
+      );
+
       const now = new Date();
-      if (date <= now) {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      if (date <= today) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `Cannot register date '${date.toLocaleDateString("en-US")}' that's in the past.`,
         });
       }
+
       const isExist = await ctx.db.query.schedules.findFirst({
         where: and(
           eq(schedules.userId, ctx.session.user.id),
@@ -49,9 +59,15 @@ export const scheduleRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const date = new Date(input.date);
+      const inputDate = new Date(input.date + "T00:00:00");
+      const date = new Date(
+        inputDate.getFullYear(),
+        inputDate.getMonth(),
+        inputDate.getDate(),
+      );
       const now = new Date();
-      if (date <= now) {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      if (date <= today) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `Cannot unregister date '${date.toLocaleDateString("en-US")}' that's in the past.`,
