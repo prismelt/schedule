@@ -13,13 +13,10 @@ function Calendar() {
   const { data: userSchedules } = api.schedule.getAllFuture.useQuery();
   const { data: hasPartner } = api.partner.hasPartner.useQuery();
 
-  let partnerSchedules: { date: Date }[] = [];
-
-  if (hasPartner) {
-    const { data: partnerSchedule } =
-      api.planning.getPartnerFutureSchedule.useQuery();
-    partnerSchedules = partnerSchedule ?? [];
-  }
+  const { data: partnerSchedules } =
+    api.planning.getPartnerFutureSchedule.useQuery(undefined, {
+      enabled: !!hasPartner,
+    });
 
   const today = new Date();
   const maxDate = new Date(

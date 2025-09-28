@@ -2,7 +2,6 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { z } from "zod";
 
 import { db } from "~/server/db";
 import {
@@ -47,45 +46,56 @@ export const authConfig = {
       credentials: {
         username: { label: "Username", type: "text" },
         email: { label: "Email", type: "email" },
-      },
+      } satisfies Record<"username" | "email", { label: string; type: string }>,
       async authorize(credentials) {
-        const parsedCredentials = z
-          .object({
-            username: z.string().min(1),
-            email: z.string().email(),
-          })
-          .safeParse(credentials);
+        if (!credentials) {
+          throw new Error("No credentials provided");
+        }
+        if (!credentials.username || !credentials.email) {
+          throw new Error("Missing username or email");
+        }
+        if (
+          typeof credentials.username !== "string" ||
+          typeof credentials.email !== "string"
+        ) {
+          throw new Error("Invalid username or email");
+        }
 
-        if (!parsedCredentials.success) return null;
+        const username = credentials.username;
+        const email = credentials.email;
 
-        const { username, email } = parsedCredentials.data;
-
-        // Check if user exists
-        let user = await db.query.users.findFirst({
+        const user = await db.query.users.findFirst({
           where: (users, { or, eq }) =>
             or(eq(users.name, username), eq(users.email, email)),
         });
 
-        if (!user) {
-          // Create new user
+        if (user) {
+          console.log("User found!!! ", user);
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          };
+        } else {
           const [newUser] = await db
             .insert(users)
             .values({
-              name: username,
-              email: email,
+              name: credentials.username,
+              email: credentials.email,
             })
             .returning();
+
           if (!newUser) {
             throw new Error("Failed to create new user");
           }
-          user = newUser;
-        }
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        };
+          console.log("New user created!!! ", newUser);
+          return {
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+          };
+        }
       },
     }),
   ],
@@ -96,12 +106,28 @@ export const authConfig = {
     verificationTokensTable: verificationTokens,
   }),
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    async jwt({ token, user }) {
+      console.log("JWT callback - user:", user, "token.id before:", token.id);
+      if (user) {
+        token.id = user.id;
+      }
+      console.log("JWT callback - token.id after:", token.id);
+      return token;
+    },
+
+    session: ({ session, token }) => {
+      console.log("Session callback - token.id:", token.id);
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id as string,
+        },
+      };
+    },
+  },
+  secret: process.env.AUTH_SECRET,
+  session: {
+    strategy: "jwt",
   },
 } satisfies NextAuthConfig;

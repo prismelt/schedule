@@ -19,13 +19,12 @@ function SignInForm() {
       const result = await signIn("credentials", {
         username,
         email,
-        redirect: false,
+        callbackUrl: "/",
       });
 
       if (result?.error) {
         setError("Invalid username or email");
-      } else {
-        window.location.href = "/";
+        setIsLoading(false);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -33,7 +32,6 @@ function SignInForm() {
       } else {
         setError("An unknown error occurred");
       }
-    } finally {
       setIsLoading(false);
     }
   };
@@ -62,7 +60,7 @@ function SignInForm() {
           disabled={isLoading}
           className={styles.signinButton}
         >
-          {isLoading ? "Signing in..." : "Sign in"}
+          {isLoading ? "Signing in..." : "Sign in / Register"}
         </button>
       </form>
 
