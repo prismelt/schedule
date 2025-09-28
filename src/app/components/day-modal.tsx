@@ -19,6 +19,13 @@ function DayModal({
 }: DayModalProps) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [partnerName, setPartnerName] = useState("");
+
+  const { data: hasPartner } = api.partner.hasPartner.useQuery();
+  if (hasPartner) {
+    const { data: partner } = api.partner.getPartner.useQuery();
+    setPartnerName(partner ?? "");
+  }
 
   const utils = api.useUtils();
 
@@ -26,7 +33,7 @@ function DayModal({
     onSuccess: () => {
       setSuccess("Successfully registered!");
       setError("");
-      utils.schedule.getAll.invalidate().catch(() => {
+      utils.schedule.getAllFuture.invalidate().catch(() => {
         setError("Failed to invalidate cache");
       });
       setTimeout(onClose, 1500);
@@ -41,7 +48,7 @@ function DayModal({
     onSuccess: () => {
       setSuccess("Successfully unregistered!");
       setError("");
-      utils.schedule.getAll.invalidate().catch(() => {
+      utils.schedule.getAllFuture.invalidate().catch(() => {
         setError("Failed to invalidate cache");
       });
       setTimeout(onClose, 1500);
@@ -96,12 +103,20 @@ function DayModal({
             </span>
           </div>
           <div className={styles.statusItem}>
-            <span className={styles.label}>Partner Status:</span>
-            <span
-              className={`${styles.badge} ${partnerIsRegistered ? styles.registered : styles.notRegistered}`}
-            >
-              {partnerIsRegistered ? "Registered" : "Not Registered"}
-            </span>
+            {partnerName.length > 0 ? (
+              <>
+                <span className={styles.label}>
+                  Partner `{partnerName}` Status:
+                </span>
+                <span
+                  className={`${styles.badge} ${partnerIsRegistered ? styles.registered : styles.notRegistered}`}
+                >
+                  {partnerIsRegistered ? "Registered" : "Not Registered"}
+                </span>
+              </>
+            ) : (
+              <span className={styles.label}>No Partner Set</span>
+            )}
           </div>
         </div>
 

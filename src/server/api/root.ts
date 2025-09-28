@@ -1,5 +1,7 @@
 import { scheduleRouter } from "~/server/api/routers/schedule";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { partnerRouter } from "./routers/partner";
+import { planningRouter } from "./routers/planning";
 
 /**
  * This is the primary router for your server.
@@ -8,6 +10,8 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   schedule: scheduleRouter,
+  partner: partnerRouter,
+  planning: planningRouter,
 });
 
 // export type definition of API

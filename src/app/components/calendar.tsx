@@ -10,7 +10,16 @@ function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  const { data: userSchedules } = api.schedule.getAll.useQuery();
+  const { data: userSchedules } = api.schedule.getAllFuture.useQuery();
+  const { data: hasPartner } = api.partner.hasPartner.useQuery();
+
+  let partnerSchedules: { date: Date }[] = [];
+
+  if (hasPartner) {
+    const { data: partnerSchedule } =
+      api.planning.getPartnerFutureSchedule.useQuery();
+    partnerSchedules = partnerSchedule ?? [];
+  }
 
   const today = new Date();
   const maxDate = new Date(
@@ -86,11 +95,20 @@ function Calendar() {
     setSelectedDate(null);
   };
 
-  // Check if user is registered for a specific date
   const isUserRegistered = (date: Date) => {
     if (!userSchedules) return false;
-    const targetDateString = date.toISOString().split("T")[0]; // "2024-09-26"
+    const targetDateString = date.toISOString().split("T")[0];
     return userSchedules.some((schedule) => {
+      const scheduleDate = new Date(schedule.date);
+      const scheduleDateString = scheduleDate.toISOString().split("T")[0];
+      return scheduleDateString === targetDateString;
+    });
+  };
+
+  const isPartnerRegistered = (date: Date) => {
+    if (!partnerSchedules) return false;
+    const targetDateString = date.toISOString().split("T")[0];
+    return partnerSchedules.some((schedule) => {
       const scheduleDate = new Date(schedule.date);
       const scheduleDateString = scheduleDate.toISOString().split("T")[0];
       return scheduleDateString === targetDateString;
@@ -135,7 +153,7 @@ function Calendar() {
             isPassed={date < today}
             isActive={![0, 1, 6].includes(date.getDay())}
             isRegistered={isUserRegistered(date)}
-            partnerIsRegistered={true} // TODO: implement partner logic
+            partnerIsRegistered={isPartnerRegistered(date)}
             onClick={handleDayClick}
           />
         ))}
@@ -145,7 +163,7 @@ function Calendar() {
         <DayModal
           date={selectedDate}
           isRegistered={isUserRegistered(selectedDate)}
-          partnerIsRegistered={true} // TODO: implement partner logic
+          partnerIsRegistered={isPartnerRegistered(selectedDate)}
           onClose={closeModal}
         />
       )}

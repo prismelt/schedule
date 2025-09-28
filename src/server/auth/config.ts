@@ -1,6 +1,8 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { z } from "zod";
 
 import { db } from "~/server/db";
 import {
@@ -39,15 +41,53 @@ declare module "next-auth" {
 export const authConfig = {
   providers: [
     DiscordProvider,
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
+    CredentialsProvider({
+      id: "credentials",
+      name: "credentials",
+      credentials: {
+        username: { label: "Username", type: "text" },
+        email: { label: "Email", type: "email" },
+      },
+      async authorize(credentials) {
+        const parsedCredentials = z
+          .object({
+            username: z.string().min(1),
+            email: z.string().email(),
+          })
+          .safeParse(credentials);
+
+        if (!parsedCredentials.success) return null;
+
+        const { username, email } = parsedCredentials.data;
+
+        // Check if user exists
+        let user = await db.query.users.findFirst({
+          where: (users, { or, eq }) =>
+            or(eq(users.name, username), eq(users.email, email)),
+        });
+
+        if (!user) {
+          // Create new user
+          const [newUser] = await db
+            .insert(users)
+            .values({
+              name: username,
+              email: email,
+            })
+            .returning();
+          if (!newUser) {
+            throw new Error("Failed to create new user");
+          }
+          user = newUser;
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        };
+      },
+    }),
   ],
   adapter: DrizzleAdapter(db, {
     usersTable: users,
