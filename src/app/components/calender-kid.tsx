@@ -1,22 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import styles from "./calendar.module.css";
-import CalendarDay from "./calendar-day";
-import DayModal from "./day-modal";
+import styles from "~/styles/calendar.module.css";
+import CalendarDayKid from "./calendar-day-kid";
+import PopupKid from "./popup-kid";
 import { api } from "~/trpc/react";
 
 function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-  const { data: userSchedules } = api.schedule.getAllFuture.useQuery();
-  const { data: hasPartner } = api.partner.hasPartner.useQuery();
-
-  const { data: partnerSchedules } =
-    api.planning.getPartnerFutureSchedule.useQuery(undefined, {
-      enabled: !!hasPartner,
-    });
+  const { data: requests } = api.kidView.getAllFuture.useQuery();
 
   const today = new Date();
   const maxDate = new Date(
@@ -39,7 +32,6 @@ function Calendar() {
       );
     }
   };
-
   const goToNextMonth = () => {
     if (canGoNext) {
       setCurrentDate(
@@ -47,7 +39,6 @@ function Calendar() {
       );
     }
   };
-
   const getDaysInMonth = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -66,7 +57,6 @@ function Calendar() {
 
     return days;
   };
-
   const monthNames = [
     "January",
     "February",
@@ -92,24 +82,54 @@ function Calendar() {
     setSelectedDate(null);
   };
 
-  const isUserRegistered = (date: Date) => {
-    if (!userSchedules) return false;
+  const isEmpty = (date: Date) => {
+    if (!requests) return true;
     const targetDateString = date.toISOString().split("T")[0];
-    return userSchedules.some((schedule) => {
-      const scheduleDate = new Date(schedule.date);
-      const scheduleDateString = scheduleDate.toISOString().split("T")[0];
-      return scheduleDateString === targetDateString;
+    return !requests.some((request) => {
+      const requestDate = new Date(request.date);
+      const requestDateString = requestDate.toISOString().split("T")[0];
+      return requestDateString === targetDateString;
     });
   };
 
-  const isPartnerRegistered = (date: Date) => {
-    if (!partnerSchedules) return false;
+  const hasUnfilledRequest = (date: Date) => {
+    if (!requests) return false;
     const targetDateString = date.toISOString().split("T")[0];
-    return partnerSchedules.some((schedule) => {
-      const scheduleDate = new Date(schedule.date);
-      const scheduleDateString = scheduleDate.toISOString().split("T")[0];
-      return scheduleDateString === targetDateString;
+    return requests.some((request) => {
+      const requestDate = new Date(request.date);
+      const requestDateString = requestDate.toISOString().split("T")[0];
+      return requestDateString === targetDateString && !request.fulfilled;
     });
+  };
+
+  const hasFulfilledRequest = (date: Date) => {
+    if (!requests) return false;
+    const targetDateString = date.toISOString().split("T")[0];
+    return requests.some((request) => {
+      const requestDate = new Date(request.date);
+      const requestDateString = requestDate.toISOString().split("T")[0];
+      return requestDateString === targetDateString && request.fulfilled;
+    });
+  };
+
+  const getRequestDate = (date: Date) => {
+    if (!requests) return null;
+    const targetDateString = date.toISOString().split("T")[0];
+    const request = requests.find((request) => {
+      const requestDate = new Date(request.date);
+      const requestDateString = requestDate.toISOString().split("T")[0];
+      return requestDateString === targetDateString;
+    });
+    if (!request) return null;
+    const partnerName = api.user.getName.useQuery(
+      {
+        userId: request.fulfillerId ?? "",
+      },
+      {
+        enabled: !!request.fulfillerId,
+      },
+    );
+    return { ...request, partnerName: partnerName.data ?? null };
   };
 
   return (
@@ -144,23 +164,23 @@ function Calendar() {
 
       <div className={styles.daysGrid}>
         {getDaysInMonth().map((date, index) => (
-          <CalendarDay
+          <CalendarDayKid
             key={index}
             date={date}
             isPassed={date < today}
             isActive={![0, 1, 6].includes(date.getDay())}
-            isRegistered={isUserRegistered(date)}
-            partnerIsRegistered={isPartnerRegistered(date)}
+            isEmpty={isEmpty(date)}
+            hasUnfilledRequest={hasUnfilledRequest(date)}
+            hasFulfilledRequest={hasFulfilledRequest(date)}
             onClick={handleDayClick}
           />
         ))}
       </div>
 
       {selectedDate && (
-        <DayModal
+        <PopupKid
           date={selectedDate}
-          isRegistered={isUserRegistered(selectedDate)}
-          partnerIsRegistered={isPartnerRegistered(selectedDate)}
+          request={getRequestDate(selectedDate)}
           onClose={closeModal}
         />
       )}

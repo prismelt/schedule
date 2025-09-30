@@ -12,18 +12,6 @@ import { type AdapterAccount } from "next-auth/adapters";
 export const createTable = pgTableCreator((name) => `schedule_${name}`);
 
 // user definition
-export const users = createTable("user", (d) => ({
-  id: d
-    .varchar({ length: 255 })
-    .notNull()
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: d.varchar({ length: 255 }).unique(),
-  email: d.varchar({ length: 255 }).notNull(),
-  language: languageEnum("language").notNull(),
-  userType: userTypeEnum("user_type").notNull(),
-}));
-
 export const languageEnum = pgEnum("language", [
   "Arabic",
   "Chinese",
@@ -32,8 +20,24 @@ export const languageEnum = pgEnum("language", [
   "Spanish",
   "Turkish",
 ]);
+export type Language = (typeof languageEnum.enumValues)[number];
 
 export const userTypeEnum = pgEnum("user_type", ["kid", "tutor"]);
+export type UserType = (typeof userTypeEnum.enumValues)[number];
+export const users = createTable("user", (d) => ({
+  id: d
+    .varchar({ length: 255 })
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: d.varchar({ length: 255 }).unique(),
+  email: d.varchar({ length: 255 }).notNull(),
+  language: languageEnum("language"),
+  userType: userTypeEnum("user_type"),
+
+  emailVerified: d.timestamp({ mode: "date", withTimezone: true }),
+  image: d.text(),
+}));
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
@@ -109,6 +113,7 @@ export const helpRequests = createTable(
     fulfilled: d.boolean().notNull(),
     date: d.timestamp().notNull(),
     subject: d.varchar({ length: 255 }).notNull(),
+    language: languageEnum("language").notNull(),
     fulfillerId: d.varchar({ length: 255 }).references(() => users.id),
   }),
   (t) => [index("help_request_user_idx").on(t.userId)],

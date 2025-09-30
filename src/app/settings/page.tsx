@@ -1,7 +1,7 @@
 import { auth } from "~/server/auth";
 import { redirect } from "next/navigation";
-import SettingsContent from "../components/settings-content";
-import styles from "./settings.module.css";
+import styles from "~/styles/settings.module.css";
+import SettingsContent from "~/app/components/setting-content";
 
 async function SettingsPage() {
   const session = await auth();
