@@ -38,12 +38,19 @@ function PopupTutorPost({ date, request, onClose }: PopupTutorPostProps) {
     },
   });
 
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.overlay} onClick={handleOverlayClick}>
+      <div className={styles.modal}>
         <button className={styles.closeButton} onClick={onClose}>
           ×
         </button>
+
         <h2 className={styles.title}>
           {date.toLocaleDateString("en-US", {
             weekday: "long",
@@ -52,25 +59,43 @@ function PopupTutorPost({ date, request, onClose }: PopupTutorPostProps) {
             day: "numeric",
           })}
         </h2>
-        {request.map((request) => (
-          <div className={styles.info} key={request.id}>
-            <span className={styles.label}>Unresponded Request:</span>
-            <span className={styles.label}>Subject:</span>
-            <span className={styles.value}>{request.subject}</span>
-            <span className={styles.label}>Kid Name:</span>
-            <span className={styles.value}>{request.name}</span>
-            <span className={styles.label}>Language:</span>
-            <span className={styles.value}>{request.language}</span>
-            <button
-              className={styles.registerButton}
-              onClick={() => respondMutation.mutate({ requestId: request.id })}
-            >
-              Respond
-            </button>
+
+        <div className={styles.content}>
+          <div className={styles.section}>
+            {request.map((req) => (
+              <div key={req.id} className={styles.requestItem}>
+                <div className={styles.requestHeader}>Available Request</div>
+
+                <div className={styles.requestDetails}>
+                  <div className={styles.statusItem}>
+                    <span className={styles.label}>Subject:</span>
+                    <span className={styles.value}>{req.subject}</span>
+                  </div>
+
+                  <div className={styles.statusItem}>
+                    <span className={styles.label}>Student Name:</span>
+                    <span className={styles.value}>{req.name}</span>
+                  </div>
+
+                  <div className={styles.statusItem}>
+                    <span className={styles.label}>Language:</span>
+                    <span className={styles.value}>{req.language}</span>
+                  </div>
+                </div>
+
+                <button
+                  className={`${styles.button} ${styles.primaryButton}`}
+                  onClick={() => respondMutation.mutate({ requestId: req.id })}
+                >
+                  Respond to Request
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
-        {error && <div className={styles.error}>{error}</div>}
-        {success && <div className={styles.success}>{success}</div>}
+
+          {error && <div className={styles.error}>{error}</div>}
+          {success && <div className={styles.success}>{success}</div>}
+        </div>
       </div>
     </div>
   );

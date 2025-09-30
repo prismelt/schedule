@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { helpRequests, users } from "~/server/db/schema";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, arrayContains } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 const tutorViewRouter = createTRPCRouter({
@@ -8,7 +8,7 @@ const tutorViewRouter = createTRPCRouter({
     const now = new Date();
     const requests = await ctx.db.query.helpRequests.findMany({
       where: and(
-        eq(helpRequests.fulfillerId, ctx.session.user.id),
+        arrayContains(helpRequests.fulfillerIdArray, [ctx.session.user.id]),
         gt(helpRequests.date, now),
       ),
       orderBy: (requests, { asc }) => [asc(requests.date)],
@@ -60,7 +60,6 @@ const tutorViewRouter = createTRPCRouter({
       where: and(
         gt(helpRequests.date, now),
         eq(helpRequests.language, tutorLanguage),
-        eq(helpRequests.fulfilled, false),
       ),
       orderBy: (requests, { asc }) => [asc(requests.date)],
     });

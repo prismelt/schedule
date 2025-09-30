@@ -66,13 +66,13 @@ const userRouter = createTRPCRouter({
     return user?.userType;
   }),
 
-  getName: protectedProcedure
-    .input(z.object({ userId: z.string() }))
+  getNameArray: protectedProcedure
+    .input(z.object({ userId: z.string().array() }))
     .query(async ({ ctx, input }) => {
-      const user = await ctx.db.query.users.findFirst({
-        where: eq(users.id, input.userId),
+      const users = await ctx.db.query.users.findMany({
+        where: (users, { inArray }) => inArray(users.id, input.userId),
       });
-      return user?.name;
+      return users.map((user) => user.name);
     }),
 });
 

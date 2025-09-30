@@ -12,8 +12,8 @@ interface PopupKidProps {
     date: Date;
     subject: string;
     fulfilled: boolean;
-    fulfillerId: string | null;
-    partnerName: string | null;
+    fulfillerIdArray: string[];
+    partnerNames: string[];
   } | null;
   onClose: () => void;
 }
@@ -21,6 +21,7 @@ interface PopupKidProps {
 function PopupKid({ date, request, onClose }: PopupKidProps) {
   const [error, setError] = useState("");
   const utils = api.useUtils();
+
   const cancelRequestMutation = api.request.delete.useMutation({
     onSuccess: () => {
       utils.kidView.getAllFuture.invalidate().catch(() => {
@@ -29,13 +30,20 @@ function PopupKid({ date, request, onClose }: PopupKidProps) {
       setTimeout(onClose, 1500);
     },
   });
-  if (!request) {
-    // show the create request page
-    return (
-      <div className={styles.overlay} onClick={onClose}>
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div className={styles.overlay} onClick={handleOverlayClick}>
+      <div className={styles.modal}>
         <button className={styles.closeButton} onClick={onClose}>
           ×
         </button>
+
         <h2 className={styles.title}>
           {date.toLocaleDateString("en-US", {
             weekday: "long",
@@ -44,86 +52,82 @@ function PopupKid({ date, request, onClose }: PopupKidProps) {
             day: "numeric",
           })}
         </h2>
-        <div className={styles.status}>
-          <div className={styles.statusItem}>
-            <span className={styles.label}>Your Status:</span>
-            <span className={`${styles.badge} ${styles.notRegistered}`}>
-              No Request Created
-            </span>
-          </div>
-        </div>
-        <Link
-          href={`/kid/post/${date.toLocaleDateString().replaceAll("/", "-")}`}
-          className={styles.registerButton}
-        >
-          Create Request
-        </Link>
-      </div>
-    );
-  } else {
-    // show the request page
-    return (
-      <div className={styles.overlay} onClick={onClose}>
-        <button className={styles.closeButton} onClick={onClose}>
-          ×
-        </button>
-        <h2 className={styles.title}>
-          {date.toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </h2>
-        <div className={styles.status}>
-          {request.fulfilled ? (
-            <div className={styles.statusItem}>
-              <span className={styles.label}>Your Status:</span>
-              <span className={`${styles.badge} ${styles.registered}`}>
-                Request Created And Fulfilled
-              </span>
-              <div className={styles.statusItem}>
-                <span className={styles.label}>Partner:</span>
-                <span className={`${styles.badge} ${styles.registered}`}>
-                  {request.partnerName}
-                </span>
+
+        <div className={styles.content}>
+          {!request ? (
+            <>
+              <div className={styles.section}>
+                <div className={styles.statusItem}>
+                  <span className={styles.label}>Your Status:</span>
+                  <div className={`${styles.badge} ${styles.empty}`}>
+                    No Request Created
+                  </div>
+                </div>
               </div>
-            </div>
+
+              <div className={styles.actions}>
+                <Link
+                  href={`/kid/post/${date.toLocaleDateString().replaceAll("/", "-")}`}
+                  className={`${styles.button} ${styles.primaryButton}`}
+                >
+                  Create Request
+                </Link>
+              </div>
+            </>
           ) : (
-            <div className={styles.statusItem}>
-              <span className={styles.label}>Your Status:</span>
-              <span className={`${styles.badge} ${styles.notRegistered}`}>
-                Request Created, Waiting For Tutors to Response
-              </span>
-            </div>
+            <>
+              <div className={styles.section}>
+                <div className={styles.statusItem}>
+                  <span className={styles.label}>Your Status:</span>
+                  <div
+                    className={`${styles.badge} ${request.fulfilled ? styles.fulfilled : styles.pending}`}
+                  >
+                    {request.fulfilled
+                      ? "Request Fulfilled"
+                      : "Waiting for Tutors"}
+                  </div>
+                </div>
+
+                <div className={styles.statusItem}>
+                  <span className={styles.label}>Subject:</span>
+                  <span className={styles.value}>{request.subject}</span>
+                </div>
+
+                {request.fulfilled && request.partnerNames.length > 0 && (
+                  <div className={styles.statusItem}>
+                    <span className={styles.label}>Partner:</span>
+                    <span className={styles.value}>
+                      {request.partnerNames.join(", ")}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.actions}>
+                <Link
+                  href={`/kid/post/${date.toLocaleDateString().replaceAll("/", "-")}`}
+                  className={`${styles.button} ${styles.primaryButton}`}
+                >
+                  Edit Request
+                </Link>
+
+                <button
+                  className={`${styles.button} ${styles.dangerButton}`}
+                  onClick={() =>
+                    cancelRequestMutation.mutate({ requestId: request.id })
+                  }
+                >
+                  Cancel Request
+                </button>
+              </div>
+            </>
           )}
+
+          {error && <div className={styles.error}>{error}</div>}
         </div>
-        <div className={styles.info}>
-          <span className={styles.label}>Subject:</span>
-          <span className={styles.value}>{request.subject}</span>
-        </div>
-        <div className={styles.actions}>
-          <button
-            className={styles.unregisterButton}
-            onClick={() =>
-              cancelRequestMutation.mutate({ requestId: request.id })
-            }
-          >
-            Cancel Request
-          </button>
-        </div>
-        <div>
-          <Link
-            href={`/kid/post/${date.toLocaleDateString().replaceAll("/", "-")}`}
-            className={styles.registerButton}
-          >
-            Edit Request
-          </Link>
-        </div>
-        {error && <div className={styles.error}>{error}</div>}
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default PopupKid;

@@ -111,11 +111,11 @@ export const helpRequests = createTable(
       .notNull()
       .references(() => users.id),
     name: d.varchar({ length: 255 }).notNull(),
-    fulfilled: d.boolean().notNull(),
+    fulfilled: d.boolean().notNull().notNull(),
     date: d.timestamp().notNull(),
     subject: d.varchar({ length: 255 }).notNull(),
     language: languageEnum("language").notNull(),
-    fulfillerId: d.varchar({ length: 255 }).references(() => users.id),
+    fulfillerIdArray: d.varchar({ length: 255 }).array().notNull(),
   }),
   (t) => [index("help_request_user_idx").on(t.userId)],
 );

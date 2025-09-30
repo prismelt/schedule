@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { helpRequests, users } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { arrayContains } from "drizzle-orm";
 
 const requestRouter = createTRPCRouter({
   create: protectedProcedure
@@ -45,6 +46,7 @@ const requestRouter = createTRPCRouter({
         date: new Date(input.date),
         subject: input.subject,
         language: user.language,
+        fulfillerIdArray: [],
       });
       return { success: true };
     }),
@@ -79,7 +81,10 @@ const requestRouter = createTRPCRouter({
       }
       await ctx.db
         .update(helpRequests)
-        .set({ fulfillerId: ctx.session.user.id, fulfilled: true })
+        .set({
+          fulfillerIdArray: sql`array_append(${helpRequests.fulfillerIdArray}, ${ctx.session.user.id})`,
+          fulfilled: true,
+        })
         .where(eq(helpRequests.id, input.requestId));
       return { success: true };
     }),
@@ -100,7 +105,7 @@ const requestRouter = createTRPCRouter({
           message: `Request does not exist`,
         });
       }
-      if (request.fulfillerId !== ctx.session.user.id) {
+      if (!request.fulfillerIdArray.includes(ctx.session.user.id)) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: `You are not authorized to unrespond to this request`,
@@ -108,7 +113,10 @@ const requestRouter = createTRPCRouter({
       }
       await ctx.db
         .update(helpRequests)
-        .set({ fulfillerId: null, fulfilled: false })
+        .set({
+          fulfillerIdArray: sql`array_remove(${helpRequests.fulfillerIdArray}, ${ctx.session.user.id})`,
+          fulfilled: request.fulfillerIdArray.length === 1,
+        })
         .where(eq(helpRequests.id, input.requestId));
       return { success: true };
     }),
@@ -150,8 +158,13 @@ const requestRouter = createTRPCRouter({
   clearHelpRespond: protectedProcedure.mutation(async ({ ctx }) => {
     await ctx.db
       .update(helpRequests)
-      .set({ fulfillerId: null, fulfilled: false })
-      .where(eq(helpRequests.fulfillerId, ctx.session.user.id));
+      .set({
+        fulfillerIdArray: sql`array_remove(${helpRequests.fulfillerIdArray}, ${ctx.session.user.id})`,
+        fulfilled: false,
+      })
+      .where(
+        arrayContains(helpRequests.fulfillerIdArray, [ctx.session.user.id]),
+      );
     return { success: true };
   }),
 

@@ -24,12 +24,14 @@ function Calendar() {
       })()
     : null;
 
-  const { data: partnerName } = api.user.getName.useQuery(
+  const { data: partnerNames } = api.user.getNameArray.useQuery(
     {
-      userId: selectedRequest?.fulfillerId ?? "",
+      userId: selectedRequest?.fulfillerIdArray ?? [],
     },
     {
-      enabled: !!selectedRequest?.fulfillerId,
+      enabled:
+        selectedRequest?.fulfillerIdArray &&
+        selectedRequest?.fulfillerIdArray.length > 0,
     },
   );
 
@@ -143,7 +145,7 @@ function Calendar() {
       return requestDateString === targetDateString;
     });
     if (!request) return null;
-    return { ...request, partnerName: partnerName ?? null };
+    return { ...request, partnerNames: partnerNames ?? [] };
   };
 
   return (
