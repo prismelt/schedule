@@ -68,6 +68,13 @@ function CalendarDayKid({
       </div>
     );
   }
+
+  // Add fallback return for any other cases
+  return (
+    <div className={styles.day} onClick={handleClick}>
+      <div className={styles.dayNumber}>{date.getDate()}</div>
+    </div>
+  );
 }
 
 export default CalendarDayKid;

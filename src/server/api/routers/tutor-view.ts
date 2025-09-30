@@ -6,27 +6,30 @@ import { TRPCError } from "@trpc/server";
 const tutorViewRouter = createTRPCRouter({
   getAllTutorFutureView: protectedProcedure.query(async ({ ctx }) => {
     const now = new Date();
-    return await ctx.db.query.helpRequests.findMany({
+    const requests = await ctx.db.query.helpRequests.findMany({
       where: and(
         eq(helpRequests.fulfillerId, ctx.session.user.id),
         gt(helpRequests.date, now),
       ),
       orderBy: (requests, { asc }) => [asc(requests.date)],
     });
+    return requests ?? [];
   }),
 
   getAllRequestsAbsolute: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.helpRequests.findMany({
+    const requests = await ctx.db.query.helpRequests.findMany({
       orderBy: (requests, { asc }) => [asc(requests.date)],
     });
+    return requests ?? [];
   }),
 
   getAllFutureRequestAbsolute: protectedProcedure.query(async ({ ctx }) => {
     const now = new Date();
-    return await ctx.db.query.helpRequests.findMany({
+    const requests = await ctx.db.query.helpRequests.findMany({
       where: and(gt(helpRequests.date, now)),
       orderBy: (requests, { asc }) => [asc(requests.date)],
     });
+    return requests ?? [];
   }),
 
   getAllFutureRequestRelative: protectedProcedure.query(async ({ ctx }) => {
@@ -53,7 +56,7 @@ const tutorViewRouter = createTRPCRouter({
       });
     }
     const tutorLanguage = tutor.language;
-    return await ctx.db.query.helpRequests.findMany({
+    const requests = await ctx.db.query.helpRequests.findMany({
       where: and(
         gt(helpRequests.date, now),
         eq(helpRequests.language, tutorLanguage),
@@ -61,6 +64,7 @@ const tutorViewRouter = createTRPCRouter({
       ),
       orderBy: (requests, { asc }) => [asc(requests.date)],
     });
+    return requests ?? [];
   }),
 });
 

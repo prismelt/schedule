@@ -53,7 +53,7 @@ function PopupKid({ date, request, onClose }: PopupKidProps) {
           </div>
         </div>
         <Link
-          href={`/kid/post/${date.toLocaleDateString()}`}
+          href={`/kid/post/${date.toLocaleDateString().replaceAll("/", "-")}`}
           className={styles.registerButton}
         >
           Create Request
@@ -114,7 +114,7 @@ function PopupKid({ date, request, onClose }: PopupKidProps) {
         </div>
         <div>
           <Link
-            href={`/kid/post/${date.toLocaleDateString()}`}
+            href={`/kid/post/${date.toLocaleDateString().replaceAll("/", "-")}`}
             className={styles.registerButton}
           >
             Edit Request

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import styles from "../signin/app.module.css";
+import styles from "~/styles/signin.module.css";
 
 function SignInForm() {
   const [username, setUsername] = useState("");

@@ -1,4 +1,4 @@
-import styles from "~/styles/app.module.css";
+import styles from "~/styles/home.module.css";
 import { auth } from "~/server/auth";
 import { redirect } from "next/navigation";
 import Calendar from "~/app/components/calender-tutor-view";

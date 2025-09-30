@@ -6,13 +6,14 @@ import { z } from "zod";
 const kidViewRouter = createTRPCRouter({
   getAllFuture: protectedProcedure.query(async ({ ctx }) => {
     const now = new Date();
-    return await ctx.db.query.helpRequests.findMany({
+    const requests = await ctx.db.query.helpRequests.findMany({
       where: and(
         eq(helpRequests.userId, ctx.session.user.id),
         gt(helpRequests.date, now),
       ),
       orderBy: (requests, { asc }) => [asc(requests.date)],
     });
+    return requests ?? [];
   }),
   getRequest: protectedProcedure
     .input(
@@ -23,12 +24,13 @@ const kidViewRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return await ctx.db.query.helpRequests.findFirst({
+      const request = await ctx.db.query.helpRequests.findFirst({
         where: and(
           eq(helpRequests.userId, ctx.session.user.id),
           eq(helpRequests.date, new Date(input.date)),
         ),
       });
+      return request ?? null;
     }),
 });
 

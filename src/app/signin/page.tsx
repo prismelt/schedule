@@ -1,7 +1,7 @@
 import { auth } from "~/server/auth";
 import { redirect } from "next/navigation";
 import SignInForm from "../components/signin-form";
-import styles from "./app.module.css";
+import styles from "~/styles/signin.module.css";
 
 async function SigninPage() {
   const session = await auth();

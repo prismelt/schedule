@@ -11,6 +11,28 @@ function Calendar() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const { data: requests } = api.kidView.getAllFuture.useQuery();
 
+  // Move the hook to component level
+  const selectedRequest = selectedDate
+    ? (() => {
+        if (!requests || requests.length === 0) return null;
+        const targetDateString = selectedDate.toISOString().split("T")[0];
+        return requests.find((request) => {
+          const requestDate = new Date(request.date);
+          const requestDateString = requestDate.toISOString().split("T")[0];
+          return requestDateString === targetDateString;
+        });
+      })()
+    : null;
+
+  const { data: partnerName } = api.user.getName.useQuery(
+    {
+      userId: selectedRequest?.fulfillerId ?? "",
+    },
+    {
+      enabled: !!selectedRequest?.fulfillerId,
+    },
+  );
+
   const today = new Date();
   const maxDate = new Date(
     today.getFullYear(),
@@ -113,7 +135,7 @@ function Calendar() {
   };
 
   const getRequestDate = (date: Date) => {
-    if (!requests) return null;
+    if (!requests || requests.length === 0) return null;
     const targetDateString = date.toISOString().split("T")[0];
     const request = requests.find((request) => {
       const requestDate = new Date(request.date);
@@ -121,15 +143,7 @@ function Calendar() {
       return requestDateString === targetDateString;
     });
     if (!request) return null;
-    const partnerName = api.user.getName.useQuery(
-      {
-        userId: request.fulfillerId ?? "",
-      },
-      {
-        enabled: !!request.fulfillerId,
-      },
-    );
-    return { ...request, partnerName: partnerName.data ?? null };
+    return { ...request, partnerName: partnerName ?? null };
   };
 
   return (
