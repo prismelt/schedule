@@ -1,4 +1,5 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
+import { pgEnum } from "drizzle-orm/pg-core";
 import { index, pgTableCreator, primaryKey } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -10,6 +11,7 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `schedule_${name}`);
 
+// user definition
 export const users = createTable("user", (d) => ({
   id: d
     .varchar({ length: 255 })
@@ -18,16 +20,20 @@ export const users = createTable("user", (d) => ({
     .$defaultFn(() => crypto.randomUUID()),
   name: d.varchar({ length: 255 }).unique(),
   email: d.varchar({ length: 255 }).notNull(),
-  emailVerified: d
-    .timestamp({
-      mode: "date",
-      withTimezone: true,
-    })
-    .default(sql`CURRENT_TIMESTAMP`),
-  image: d.varchar({ length: 255 }),
-  partnerId: d.varchar({ length: 255 }),
-  partnerName: d.varchar({ length: 255 }).unique(),
+  language: languageEnum("language").notNull(),
+  userType: userTypeEnum("user_type").notNull(),
 }));
+
+export const languageEnum = pgEnum("language", [
+  "Arabic",
+  "Chinese",
+  "Japanese",
+  "Russian",
+  "Spanish",
+  "Turkish",
+]);
+
+export const userTypeEnum = pgEnum("user_type", ["kid", "tutor"]);
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
@@ -61,6 +67,16 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, { fields: [accounts.userId], references: [users.id] }),
 }));
 
+export const verificationTokens = createTable(
+  "verification_token",
+  (d) => ({
+    identifier: d.varchar({ length: 255 }).notNull(),
+    token: d.varchar({ length: 255 }).notNull(),
+    expires: d.timestamp({ mode: "date", withTimezone: true }).notNull(),
+  }),
+  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
+);
+
 export const sessions = createTable(
   "session",
   (d) => ({
@@ -78,33 +94,26 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 }));
 
-export const verificationTokens = createTable(
-  "verification_token",
-  (d) => ({
-    identifier: d.varchar({ length: 255 }).notNull(),
-    token: d.varchar({ length: 255 }).notNull(),
-    expires: d.timestamp({ mode: "date", withTimezone: true }).notNull(),
-  }),
-  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
-);
+// user definition
 
-/**
- * This following is the planned schedule code
- * this is not the example provided
- */
-export const schedules = createTable(
-  "schedule",
+// help request definition
+
+export const helpRequests = createTable(
+  "help_request",
   (d) => ({
     id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
     userId: d
       .varchar({ length: 255 })
       .notNull()
       .references(() => users.id),
+    fulfilled: d.boolean().notNull(),
     date: d.timestamp().notNull(),
+    subject: d.varchar({ length: 255 }).notNull(),
+    fulfillerId: d.varchar({ length: 255 }).references(() => users.id),
   }),
-  (t) => [index("schedule_user_idx").on(t.userId)],
+  (t) => [index("help_request_user_idx").on(t.userId)],
 );
 
-export const scheduleRelations = relations(schedules, ({ one }) => ({
-  user: one(users, { fields: [schedules.userId], references: [users.id] }),
+export const helpRequestRelations = relations(helpRequests, ({ one }) => ({
+  user: one(users, { fields: [helpRequests.userId], references: [users.id] }),
 }));
