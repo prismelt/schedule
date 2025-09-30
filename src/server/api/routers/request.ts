@@ -40,6 +40,7 @@ const requestRouter = createTRPCRouter({
 
       await ctx.db.insert(helpRequests).values({
         userId: ctx.session.user.id,
+        name: user.name,
         fulfilled: false,
         date: new Date(input.date),
         subject: input.subject,

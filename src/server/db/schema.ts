@@ -30,7 +30,7 @@ export const users = createTable("user", (d) => ({
     .notNull()
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  name: d.varchar({ length: 255 }).unique(),
+  name: d.varchar({ length: 255 }).unique().notNull(),
   email: d.varchar({ length: 255 }).notNull(),
   language: languageEnum("language"),
   userType: userTypeEnum("user_type"),
@@ -110,6 +110,7 @@ export const helpRequests = createTable(
       .varchar({ length: 255 })
       .notNull()
       .references(() => users.id),
+    name: d.varchar({ length: 255 }).notNull(),
     fulfilled: d.boolean().notNull(),
     date: d.timestamp().notNull(),
     subject: d.varchar({ length: 255 }).notNull(),

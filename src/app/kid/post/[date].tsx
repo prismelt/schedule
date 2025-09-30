@@ -7,7 +7,9 @@ import { useSearchParams } from "next/navigation";
 
 function PostPage() {
   const searchParams = useSearchParams();
-  const date = searchParams.get("date");
+  const dateLocalString = searchParams.get("date");
+  const localDate = new Date(dateLocalString!);
+  const date = localDate.toISOString().split("T")[0];
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [subject, setSubject] = useState("");
