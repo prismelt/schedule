@@ -3,6 +3,7 @@ import userRouter from "./routers/user";
 import requestRouter from "./routers/request";
 import tutorViewRouter from "./routers/tutor-view";
 import kidViewRouter from "./routers/kid-view";
+import adminRouter from "./routers/admin";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   request: requestRouter,
   tutorView: tutorViewRouter,
   kidView: kidViewRouter,
+  admin: adminRouter,
 });
 
 // export type definition of API
