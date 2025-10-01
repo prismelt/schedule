@@ -38,15 +38,15 @@ function Calendar() {
   const today = new Date();
   const maxDate = new Date(
     today.getFullYear(),
-    today.getMonth() + 1,
+    today.getMonth(),
     today.getDate(),
   );
 
   const canGoNext =
-    currentDate.getMonth() < maxDate.getMonth() ||
+    currentDate.getMonth() < maxDate.getMonth() + 1 ||
     currentDate.getFullYear() < maxDate.getFullYear();
   const canGoPrev =
-    currentDate.getMonth() >= today.getMonth() &&
+    currentDate.getMonth() + 1 >= today.getMonth() + 1 &&
     currentDate.getFullYear() >= today.getFullYear();
 
   const goToPreviousMonth = () => {
@@ -108,40 +108,40 @@ function Calendar() {
 
   const isEmpty = (date: Date) => {
     if (!requests) return true;
-    const targetDateString = date.toISOString().split("T")[0];
+    const targetDateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     return !requests.some((request) => {
       const requestDate = new Date(request.date);
-      const requestDateString = requestDate.toISOString().split("T")[0];
+      const requestDateString = `${requestDate.getFullYear()}-${String(requestDate.getMonth() + 1).padStart(2, "0")}-${String(requestDate.getDate()).padStart(2, "0")}`;
       return requestDateString === targetDateString;
     });
   };
 
   const hasUnfilledRequest = (date: Date) => {
     if (!requests) return false;
-    const targetDateString = date.toISOString().split("T")[0];
+    const targetDateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     return requests.some((request) => {
       const requestDate = new Date(request.date);
-      const requestDateString = requestDate.toISOString().split("T")[0];
+      const requestDateString = `${requestDate.getFullYear()}-${String(requestDate.getMonth() + 1).padStart(2, "0")}-${String(requestDate.getDate()).padStart(2, "0")}`;
       return requestDateString === targetDateString && !request.fulfilled;
     });
   };
 
   const hasFulfilledRequest = (date: Date) => {
     if (!requests) return false;
-    const targetDateString = date.toISOString().split("T")[0];
+    const targetDateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     return requests.some((request) => {
       const requestDate = new Date(request.date);
-      const requestDateString = requestDate.toISOString().split("T")[0];
+      const requestDateString = `${requestDate.getFullYear()}-${String(requestDate.getMonth() + 1).padStart(2, "0")}-${String(requestDate.getDate()).padStart(2, "0")}`;
       return requestDateString === targetDateString && request.fulfilled;
     });
   };
 
   const getRequestDate = (date: Date) => {
     if (!requests || requests.length === 0) return null;
-    const targetDateString = date.toISOString().split("T")[0];
+    const targetDateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     const request = requests.find((request) => {
       const requestDate = new Date(request.date);
-      const requestDateString = requestDate.toISOString().split("T")[0];
+      const requestDateString = `${requestDate.getFullYear()}-${String(requestDate.getMonth() + 1).padStart(2, "0")}-${String(requestDate.getDate()).padStart(2, "0")}`;
       return requestDateString === targetDateString;
     });
     if (!request) return null;
@@ -159,7 +159,7 @@ function Calendar() {
           ←
         </button>
         <h2 className={styles.monthYear}>
-          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+          {monthNames[currentDate.getMonth() + 1]} {currentDate.getFullYear()}
         </h2>
         <button
           onClick={goToNextMonth}

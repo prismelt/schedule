@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "~/styles/day-modal.module.css";
+import { api } from "~/trpc/react";
 
 function Navigation() {
   const pathname = usePathname();
@@ -15,7 +16,8 @@ function Navigation() {
   ];
 
   // Determine current role based on pathname
-  const currentRole = pathname.includes("/kid/") ? "kid" : "tutor";
+  const { data: userType } = api.user.getUserType.useQuery();
+  const currentRole = userType ?? "kid"; // fake value that will not be used
 
   const filteredNavItems = navItems.filter(
     (item) => item.roles.includes(currentRole) || item.roles.includes("both"),

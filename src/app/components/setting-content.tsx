@@ -95,17 +95,23 @@ function SettingsContent() {
         <Link href="/" className={styles.backButton}>
           ← Back to Calendar
         </Link>
-        {error && <div className={styles.error}>{error}</div>}
-        {success && <div className={styles.success}>{success}</div>}
+        {error && <div className={styles.error}>Error: {error}</div>}
+        {success && <div className={styles.success}>Success: {success}</div>}
       </section>
 
       {/* Language Management */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Partner Management</h2>
+        <h2 className={styles.sectionTitle}>Language Management</h2>
         {userLanguage ? (
-          <h2 className={styles.sectionTitle}>Change Language</h2>
+          <>
+            <div className={styles.currentValue}>
+              <span className={styles.label}>Current Language:</span>
+              <span className={styles.value}>{userLanguage}</span>
+            </div>
+            <h3 className={styles.sectionSubtitle}>Change Language</h3>
+          </>
         ) : (
-          <h2 className={styles.sectionTitle}> Set Language</h2>
+          <h3 className={styles.sectionSubtitle}>Set Language</h3>
         )}
         <div className={styles.inputGroup}>
           <select
@@ -134,9 +140,15 @@ function SettingsContent() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>User Type Management</h2>
         {userUserType ? (
-          <h2 className={styles.sectionTitle}>Change User Type</h2>
+          <>
+            <div className={styles.currentValue}>
+              <span className={styles.label}>Current User Type:</span>
+              <span className={styles.value}>{userUserType}</span>
+            </div>
+            <h3 className={styles.sectionSubtitle}>Change User Type</h3>
+          </>
         ) : (
-          <h2 className={styles.sectionTitle}> Set User Type</h2>
+          <h3 className={styles.sectionSubtitle}>Set User Type</h3>
         )}
         <div className={styles.inputGroup}>
           <select

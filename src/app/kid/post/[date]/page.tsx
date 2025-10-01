@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import styles from "~/styles/post.module.css";
 import { redirect } from "next/navigation";
+import Navigation from "~/app/components/navigation";
 
 function PostPage({ params }: { params: Promise<{ date: string }> }) {
   const [date, setDate] = useState<string>("");
@@ -23,16 +24,15 @@ function PostPage({ params }: { params: Promise<{ date: string }> }) {
     { enabled: !!date },
   );
 
-  const { data: partner } = api.user.getName.useQuery(
-    { userId: request?.fulfillerId ?? "" },
-    { enabled: !!request?.fulfillerId },
+  const { data: partner } = api.user.getNameArray.useQuery(
+    { userId: request?.fulfillerIdArray ?? [] },
+    { enabled: !!request?.fulfillerIdArray },
   );
 
   useEffect(() => {
     void params
       .then(({ date: paramDate }) => {
-        const localDate = new Date(paramDate.replaceAll("-", "/"));
-        setDate(localDate.toISOString().split("T")[0]!);
+        setDate(paramDate);
       })
       .catch((error) => {
         setError(`Failed to load date parameter: ${error}`);
@@ -51,7 +51,7 @@ function PostPage({ params }: { params: Promise<{ date: string }> }) {
     setStatus(request.fulfilled ? "fulfilled" : "created");
     setSubject(request.subject);
     setRequestId(request.id);
-    setPartnerName(partner ?? null);
+    setPartnerName(partner?.join(", ") ?? null);
   }, [request, partner]);
 
   const createRequestMutation = api.request.create.useMutation({
@@ -99,7 +99,10 @@ function PostPage({ params }: { params: Promise<{ date: string }> }) {
   });
 
   const handleCreateRequest = () => {
-    createRequestMutation.mutate({ date: date, subject });
+    createRequestMutation.mutate({
+      date: new Date(Date.parse(date)).toISOString(),
+      subject,
+    });
   };
 
   const handleUpdateRequest = () => {
@@ -120,6 +123,8 @@ function PostPage({ params }: { params: Promise<{ date: string }> }) {
 
   return (
     <main className={styles.main}>
+      <Navigation />
+      <br></br>
       <div className={styles.container}>
         <h2 className={styles.title}>
           {status === "empty" ? "Create Request" : "Edit Request"}

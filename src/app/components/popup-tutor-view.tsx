@@ -11,7 +11,7 @@ interface PopupTutorViewProps {
     date: Date;
     subject: string;
     fulfilled: boolean;
-    fulfillerId: string | null;
+    fulfillerIdArray: string[];
     name: string;
     language: string;
   }[];

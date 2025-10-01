@@ -54,6 +54,13 @@
   color: #374151;
 }
 
+.sectionSubtitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
 .partnerInfo {
   display: flex;
   align-items: center;
@@ -147,6 +154,28 @@
   padding: 1rem;
   border-radius: 6px;
   border: 1px solid #bbf7d0;
+}
+
+.currentValue {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #e5f3ff;
+  border-radius: 6px;
+  border-left: 4px solid #667eea;
+}
+
+.currentValue .label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.currentValue .value {
+  color: #667eea;
+  font-weight: 500;
+  text-transform: capitalize;
 }
 
 @media (max-width: 640px) {
