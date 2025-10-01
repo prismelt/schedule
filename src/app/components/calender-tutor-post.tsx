@@ -5,8 +5,10 @@ import styles from "~/styles/calendar.module.css";
 import { api } from "~/trpc/react";
 import CalendarDayTutorPost from "./calender-day-tutor-post";
 import PopupTutorPost from "./popup-tutor-post";
+import { useSession } from "next-auth/react";
 
 function Calendar() {
+  const { data: session } = useSession();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const { data: requests } =
@@ -93,14 +95,17 @@ function Calendar() {
     });
   };
 
-  const getAllUnfulfilledRequestFor = (date: Date) => {
-    if (!requests) return [];
+  const getAllRequestFor = (date: Date) => {
+    if (!requests || !session?.user?.id) return [];
     if (isEmpty(date)) return [];
     const targetDateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     return requests.filter((request) => {
       const requestDate = new Date(request.date);
       const requestDateString = `${requestDate.getFullYear()}-${String(requestDate.getMonth() + 1).padStart(2, "0")}-${String(requestDate.getDate()).padStart(2, "0")}`;
-      return requestDateString === targetDateString && !request.fulfilled;
+      return (
+        requestDateString === targetDateString &&
+        !request.fulfillerIdArray.includes(session.user.id)
+      );
     });
   };
 
@@ -115,7 +120,7 @@ function Calendar() {
           ←
         </button>
         <h2 className={styles.monthYear}>
-          {monthNames[currentDate.getMonth() + 1]} {currentDate.getFullYear()}
+          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h2>
         <button
           onClick={goToNextMonth}
@@ -142,7 +147,7 @@ function Calendar() {
             isPassed={date < today}
             isActive={![0, 1, 6].includes(date.getDay())}
             isEmpty={isEmpty(date)}
-            unfulfilledRequestsLength={getAllUnfulfilledRequestFor(date).length}
+            requestsLength={getAllRequestFor(date).length}
             onClick={handleDayClick}
           />
         ))}
@@ -151,7 +156,7 @@ function Calendar() {
       {selectedDate && (
         <PopupTutorPost
           date={selectedDate}
-          request={getAllUnfulfilledRequestFor(selectedDate)}
+          request={getAllRequestFor(selectedDate)}
           onClose={closeModal}
         />
       )}

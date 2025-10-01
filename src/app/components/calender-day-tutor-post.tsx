@@ -5,7 +5,7 @@ interface CalendarDayTutorPostProps {
   isPassed: boolean;
   isActive: boolean;
   isEmpty: boolean;
-  unfulfilledRequestsLength: number;
+  requestsLength: number;
   onClick: (date: Date) => void;
 }
 
@@ -14,7 +14,7 @@ function CalendarDayTutorPost({
   isPassed,
   isActive,
   isEmpty,
-  unfulfilledRequestsLength,
+  requestsLength,
   onClick,
 }: CalendarDayTutorPostProps) {
   const handleClick = () => {
@@ -51,8 +51,8 @@ function CalendarDayTutorPost({
     >
       <div className={styles.dayNumber}>{date.getDate()}</div>
       <div className={styles.dayContent}>
-        {unfulfilledRequestsLength} request
-        {unfulfilledRequestsLength > 1 ? "s" : ""}
+        {requestsLength} request
+        {requestsLength > 1 ? "s" : ""}
       </div>
     </div>
   );

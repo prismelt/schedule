@@ -82,7 +82,7 @@ const requestRouter = createTRPCRouter({
       await ctx.db
         .update(helpRequests)
         .set({
-          fulfillerIdArray: sql`array_append(${helpRequests.fulfillerIdArray}, ${ctx.session.user.id})`,
+          fulfillerIdArray: sql`array_append(${helpRequests.fulfillerIdArray}::text[], ${ctx.session.user.id})`,
           fulfilled: true,
         })
         .where(eq(helpRequests.id, input.requestId));
@@ -114,7 +114,7 @@ const requestRouter = createTRPCRouter({
       await ctx.db
         .update(helpRequests)
         .set({
-          fulfillerIdArray: sql`array_remove(${helpRequests.fulfillerIdArray}, ${ctx.session.user.id})`,
+          fulfillerIdArray: sql`array_remove(${helpRequests.fulfillerIdArray}::text[], ${ctx.session.user.id})`,
           fulfilled: request.fulfillerIdArray.length === 1,
         })
         .where(eq(helpRequests.id, input.requestId));
@@ -159,7 +159,7 @@ const requestRouter = createTRPCRouter({
     await ctx.db
       .update(helpRequests)
       .set({
-        fulfillerIdArray: sql`array_remove(${helpRequests.fulfillerIdArray}, ${ctx.session.user.id})`,
+        fulfillerIdArray: sql`array_remove(${helpRequests.fulfillerIdArray}::text[], ${ctx.session.user.id})`,
         fulfilled: false,
       })
       .where(

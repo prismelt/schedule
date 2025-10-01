@@ -58,12 +58,6 @@ function Calendar() {
     return days;
   };
 
-  console.error(
-    `Date in Month: ${getDaysInMonth()
-      .map((date) => date.toDateString())
-      .toString()}`,
-  );
-
   const monthNames = [
     "January",
     "February",
@@ -121,7 +115,7 @@ function Calendar() {
           ←
         </button>
         <h2 className={styles.monthYear}>
-          {monthNames[currentDate.getMonth() + 1]} {currentDate.getFullYear()}
+          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h2>
         <button
           onClick={goToNextMonth}
