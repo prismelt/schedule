@@ -28,7 +28,7 @@ function Calendar() {
   const goToPreviousMonth = () => {
     if (canGoPrev) {
       setCurrentDate(
-        new Date(currentDate.getFullYear(), currentDate.getMonth() + 1 - 1, 1),
+        new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
       );
     }
   };
@@ -57,6 +57,13 @@ function Calendar() {
 
     return days;
   };
+
+  console.error(
+    `Date in Month: ${getDaysInMonth()
+      .map((date) => date.toDateString())
+      .toString()}`,
+  );
+
   const monthNames = [
     "January",
     "February",

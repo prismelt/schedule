@@ -159,7 +159,7 @@ function Calendar() {
           ←
         </button>
         <h2 className={styles.monthYear}>
-          {monthNames[currentDate.getMonth() + 1]} {currentDate.getFullYear()}
+          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h2>
         <button
           onClick={goToNextMonth}
