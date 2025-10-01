@@ -116,6 +116,7 @@ export const helpRequests = createTable(
     subject: d.varchar({ length: 255 }).notNull(),
     language: languageEnum("language").notNull(),
     fulfillerIdArray: d.varchar({ length: 255 }).array().notNull(),
+    fulfillerNames: d.varchar({ length: 255 }).array().notNull(),
   }),
   (t) => [index("help_request_user_idx").on(t.userId)],
 );

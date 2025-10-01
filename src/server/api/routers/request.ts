@@ -47,6 +47,7 @@ const requestRouter = createTRPCRouter({
         subject: input.subject,
         language: user.language,
         fulfillerIdArray: [],
+        fulfillerNames: [],
       });
       return { success: true };
     }),
@@ -83,6 +84,7 @@ const requestRouter = createTRPCRouter({
         .update(helpRequests)
         .set({
           fulfillerIdArray: sql`array_append(${helpRequests.fulfillerIdArray}::text[], ${ctx.session.user.id})`,
+          fulfillerNames: sql`array_append(${helpRequests.fulfillerNames}::text[], ${user.name})`,
           fulfilled: true,
         })
         .where(eq(helpRequests.id, input.requestId));
@@ -115,6 +117,7 @@ const requestRouter = createTRPCRouter({
         .update(helpRequests)
         .set({
           fulfillerIdArray: sql`array_remove(${helpRequests.fulfillerIdArray}::text[], ${ctx.session.user.id})`,
+          fulfillerNames: sql`array_remove(${helpRequests.fulfillerNames}::text[], ${request.fulfillerNames[0]})`,
           fulfilled: request.fulfillerIdArray.length === 1,
         })
         .where(eq(helpRequests.id, input.requestId));

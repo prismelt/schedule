@@ -12,6 +12,7 @@ interface PopupTutorPostProps {
     subject: string;
     fulfilled: boolean;
     fulfillerIdArray: string[];
+    fulfillerNames: string[];
     name: string;
     language: string;
   }[];
@@ -78,8 +79,12 @@ function PopupTutorPost({ date, request, onClose }: PopupTutorPostProps) {
                   </div>
 
                   <div className={styles.statusItem}>
-                    <span className={styles.label}>Language:</span>
-                    <span className={styles.value}>{req.language}</span>
+                    <span className={styles.label}>Tutors: </span>
+                    <span className={styles.value}>
+                      {req.fulfillerNames.length === 0
+                        ? "None"
+                        : req.fulfillerNames.join(", ")}
+                    </span>
                   </div>
                 </div>
 

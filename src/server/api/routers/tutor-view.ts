@@ -13,7 +13,24 @@ const tutorViewRouter = createTRPCRouter({
       ),
       orderBy: (requests, { asc }) => [asc(requests.date)],
     });
-    return requests ?? [];
+
+    // Get fulfiller names for each request
+    const requestsWithNames = await Promise.all(
+      requests.map(async (request) => {
+        const fulfillerNames = await ctx.db.query.users.findMany({
+          where: (users, { inArray }) =>
+            inArray(users.id, request.fulfillerIdArray),
+          columns: { name: true },
+        });
+
+        return {
+          ...request,
+          fulfillerNames: fulfillerNames.map((user) => user.name),
+        };
+      }),
+    );
+
+    return requestsWithNames ?? [];
   }),
 
   getAllRequestsAbsolute: protectedProcedure.query(async ({ ctx }) => {

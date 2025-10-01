@@ -99,7 +99,7 @@ function Calendar() {
     if (!requests || !session?.user?.id) return [];
     if (isEmpty(date)) return [];
     const targetDateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-    return requests.filter((request) => {
+    const filteredRequests = requests.filter((request) => {
       const requestDate = new Date(request.date);
       const requestDateString = `${requestDate.getFullYear()}-${String(requestDate.getMonth() + 1).padStart(2, "0")}-${String(requestDate.getDate()).padStart(2, "0")}`;
       return (
@@ -107,6 +107,8 @@ function Calendar() {
         !request.fulfillerIdArray.includes(session.user.id)
       );
     });
+
+    return filteredRequests;
   };
 
   return (
