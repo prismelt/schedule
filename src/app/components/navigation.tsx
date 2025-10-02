@@ -9,15 +9,15 @@ function Navigation() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/kid/view", label: "My Requests", roles: ["kid"] },
+    { href: "/student/view", label: "My Requests", roles: ["student"] },
     { href: "/tutor/post", label: "All Requests", roles: ["tutor"] },
     { href: "/tutor/view", label: "My Responses", roles: ["tutor"] },
-    { href: "/settings", label: "Settings", roles: ["kid", "tutor"] },
+    { href: "/settings", label: "Settings", roles: ["student", "tutor"] },
   ];
 
   // Determine current role based on pathname
   const { data: userType } = api.user.getUserType.useQuery();
-  const currentRole = userType ?? "kid"; // fake value that will not be used
+  const currentRole = userType ?? "none"; // fake value that will not be used
 
   const filteredNavItems = navItems.filter(
     (item) => item.roles.includes(currentRole) || item.roles.includes("both"),

@@ -22,7 +22,7 @@ export const languageEnum = pgEnum("language", [
 ]);
 export type Language = (typeof languageEnum.enumValues)[number];
 
-export const userTypeEnum = pgEnum("user_type", ["kid", "tutor"]);
+export const userTypeEnum = pgEnum("user_type", ["student", "tutor"]);
 export type UserType = (typeof userTypeEnum.enumValues)[number];
 export const users = createTable("user", (d) => ({
   id: d

@@ -20,8 +20,8 @@ async function Home() {
   }
 
   // Redirect based on user type
-  if (user.userType === "kid") {
-    redirect("/kid/view");
+  if (user.userType === "student") {
+    redirect("/student/view");
   } else if (user.userType === "tutor") {
     redirect("/tutor/view");
   }

@@ -199,7 +199,7 @@ function SettingsContent() {
       </section>
 
       {/* Request Management */}
-      {userUserType === "kid" ? (
+      {userUserType === "student" ? (
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Request Management</h2>
           <button

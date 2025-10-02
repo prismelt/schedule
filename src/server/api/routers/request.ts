@@ -32,7 +32,7 @@ const requestRouter = createTRPCRouter({
         });
       }
 
-      if (user.userType !== "kid") {
+      if (user.userType !== "student") {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `Only kids can create help requests`,
